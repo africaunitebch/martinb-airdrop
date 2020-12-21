@@ -4,8 +4,8 @@ With this app, you can transfer your token until to 150 addresses at once, simpl
 How to run the project:
 
 * Clone this repo
-* Deploy airdrop smart contract (./smart_contract/Airdrop.sol)
-* Save newly created airdrop contract address on app.js -> App.airdropAddress
+* Deploy airdrop smart contract `(./contracts/Airdrop.sol)`
+* Save newly created airdrop contract address on app.js -> `App.airdropAddress`
 * Run project
 * Enjoy
 
