@@ -114,6 +114,17 @@ App = {
       "payable": false,
       "stateMutability": "view",
       "type": "function"
+    },{
+      "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [{
+        "name": "",
+        "type": "uint8"
+      }],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     }, {
       "constant": false,
       "inputs": [{
@@ -365,13 +376,23 @@ App = {
         }
       })
 
+      // Fetch decimal from contract
+      const BN = App.web3.utils.BN
+      const decimals = await App.tokenInstance.methods.decimals().call()
+      let totalAmount = new BN(0)
+
       // Replacing and creating 'amounts' array
       amounts = $('#amounts').val().split(',').map(value => {
-        if (Number(value) !== 0) {
-          return Number(value)
+        if (decimals.toString() === '18') {
+          value = App.web3.utils.toWei(value.toString())
         } else {
-          throw ('Founded  number 0 in amounts, please remove it!');
+          value *= 10**Number(decimals.toString())
         }
+
+        // Calculating total sum of 'amounts' array items
+        totalAmount = totalAmount.add(new BN(value))
+
+        return value
       })
 
       // Checking arrays length and validities
@@ -379,11 +400,7 @@ App = {
         throw ('Issue with receivers/amount values!')
       }
 
-      // Calculating total sum of 'amounts' array items
-      totalAmount = parseFloat(amounts.reduce((a, b) => a + b).toFixed(2))
-
       const allowance = App.web3.utils.fromWei(await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call(), 'ether')
-
       // If allowance tokens are not enough call approve
       if (+totalAmount > +allowance) {
         await App.approveTokens()
@@ -436,7 +453,6 @@ App = {
   approveTokens: async () => {
     try {
       const maxUint = '11579208923731619542357098500868790785326998466564056403945758400791312963993'
-      console.log(App.tokenInstance)
       return await App.tokenInstance.methods.approve(App.airdropAddress, maxUint).send({
         from: App.account
       })
