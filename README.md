@@ -12,5 +12,5 @@ How to run the project:
 If it helps you please add the "Star" to this repo, thanks.
 
 ## Screenshots
-![alt text](https://raw.githubusercontent.com/Araton95/Easy_Airdrop_dApp/master/screenshot-localhost-8080-2018.10.04-23-15-52.png)
+![alt text](https://raw.githubusercontent.com/Araton95/Easy_Airdrop_dApp/master/mass-sending-screenshot.png)
 
