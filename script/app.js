@@ -46,11 +46,6 @@ App = {
   initContracts: async () => {
     App.networkId = await App.web3.eth.net.getId()
 
-    if (App.networkId !== 1) {
-      $("#submit").attr("disabled", true)
-      alert("Please switch your Metamask node to Mainnet");
-      return
-    }
 
     App.tokenABI = [{
       "constant": false,
@@ -228,7 +223,7 @@ App = {
       "type": "function"
     }]
 
-    App.airdropAddress = "0x6c1ff868546cacac2721b1598c10e0d90095f728" // TODO
+    App.airdropAddress = "0x809Ec6eD4E1bdC226240dD21aCfFc104f22605C5" // BSC
     App.airdropInstance = new App.web3.eth.Contract(App.airdropABI, App.airdropAddress)
 
     return App.initVariables()
@@ -323,9 +318,26 @@ App = {
             id: 42
         }
         break
+      case 56:
+        return {
+          network: "Binance Smart Chain",
+            url: "https://bscscan.com/",
+            id: 56
+        }
+        break
       default:
         console.log('This is an unknown network.')
     }
+  },
+
+  toWei: (amount, decimals) => {
+    const BN = App.web3.utils.BN
+    return (new BN(amount.toString()).mul(new BN('10').pow(new BN(decimals.toString()))))
+  },
+
+  fromWei: (amount, decimals) => {
+    const BN = App.web3.utils.BN
+    return (new BN(amount.toString()).div(new BN('10').pow(new BN(decimals.toString()))))
   },
 
   reloadListener: e => {
@@ -346,8 +358,7 @@ App = {
 
   startAirdrop: async () => {
     let amounts = [],
-        receivers = [],
-        totalAmount = 0
+        receivers = []
 
     try {
       App.tokenAddress = App.web3.utils.toChecksumAddress($('#token-address').val())
@@ -378,31 +389,34 @@ App = {
 
       // Fetch decimal from contract
       const BN = App.web3.utils.BN
-      const decimals = await App.tokenInstance.methods.decimals().call()
       let totalAmount = new BN(0)
+      const decimals = await App.tokenInstance.methods.decimals().call()
 
-      // Replacing and creating 'amounts' array
-      amounts = $('#amounts').val().split(',').map(value => {
-        if (decimals.toString() === '18') {
-          value = App.web3.utils.toWei(value.toString())
-        } else {
-          value *= 10**Number(decimals.toString())
-        }
+      // If only 1 amount for all
+      if ($('#amounts').val().split(',').length <= 2) {
+        const globalAmount = $('#amounts').val()
+        amounts = new Array(receivers.length).fill(App.toWei(globalAmount, decimals).toString())
+      } else {
+        // Replacing and creating 'amounts' array
+        amounts = $('#amounts').val().split(',').map(value => {
+          return App.toWei(value, decimals)
+        })
+      }
 
-        // Calculating total sum of 'amounts' array items
-        totalAmount = totalAmount.add(new BN(value))
-
-        return value
+      // Calculating total sum of 'amounts' array items
+      amounts.map(value => {
+        totalAmount = totalAmount.add(new BN(App.toWei(value, decimals)))
       })
 
       // Checking arrays length and validities
-      if (receivers.length == 0 || amounts.length == 0 || receivers.length != amounts.length || receivers.length > 150 || amounts.length > 150) {
+      if (receivers.length == 0 || amounts.length == 0 || receivers.length != amounts.length) {
         throw ('Issue with receivers/amount values!')
       }
 
-      const allowance = App.web3.utils.fromWei(await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call(), 'ether')
+      const allowance = App.fromWei(await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call(), decimals)
+
       // If allowance tokens are not enough call approve
-      if (+totalAmount > +allowance) {
+      if (totalAmount.gt(allowance)) {
         await App.approveTokens()
       }
 
@@ -412,42 +426,23 @@ App = {
     }
   },
 
-  doAirdrop: (receivers, amounts) => {
-    return new Promise((resolve, reject) => {
-      // Calling the method from airdrop smart contract
-      App.airdropInstance.methods.doAirdrop(App.tokenAddress, receivers, amounts).send({
-          from: App.account
-        })
-        .on("transactionHash", hash => {
-          App.alertInReload(true)
-          const newTx = {
-            hash,
-            status: "Pending",
-            users: receivers.length,
-            amount: totalAmount
-          }
-          let transactions = JSON.parse(localStorage.getItem("transactions"))
-          transactions.unshift(newTx)
-          localStorage.setItem("transactions", JSON.stringify(transactions))
-          App.showTransactions()
-        })
-        .on("receipt", receipt => {
-          App.alertInReload(false)
+  doAirdrop: async (receivers, amounts) => {
+    const ADDRESSES_PER_TX = 200
+    const batchesCount = Math.ceil(receivers.length / ADDRESSES_PER_TX)
 
-          const hash = receipt.transactionHash
-          const transactions = JSON.parse(localStorage.getItem("transactions"))
-          const txIndex = transactions.findIndex(tx => tx.hash === hash);
-          transactions[txIndex].status = "Done"
+    for (let i = 0; i < batchesCount; i++) {
+      const startIndex = i * ADDRESSES_PER_TX
+      const endIndex = startIndex + ADDRESSES_PER_TX
+      console.log(`User Range: ${startIndex} - ${endIndex}`)
 
-          localStorage.setItem("transactions", JSON.stringify(transactions))
-          App.render()
-          resolve()
-        })
-        .on("error", error => {
-          App.alertInReload(false)
-          reject("Tx was failed")
-        })
-    })
+      // Divide data into small groups
+      const receiverParts = receivers.slice(startIndex, endIndex)
+      const amountParts = amounts.slice(startIndex, endIndex)
+
+      await App.airdropInstance.methods.doAirdrop(App.tokenAddress, receiverParts, amountParts).send({
+        from: App.account
+      })
+    }
   },
 
   approveTokens: async () => {
