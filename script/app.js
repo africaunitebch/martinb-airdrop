@@ -46,6 +46,11 @@ App = {
   initContracts: async () => {
     App.networkId = await App.web3.eth.net.getId()
 
+    if (App.networkId !== 56) {
+      $("#submit").attr("disabled", true)
+      alert("Please switch to Binance Smart Chain");
+      return
+    }
 
     App.tokenABI = [{
       "constant": false,
@@ -427,7 +432,7 @@ App = {
   },
 
   doAirdrop: async (receivers, amounts) => {
-    const ADDRESSES_PER_TX = 200
+    const ADDRESSES_PER_TX = 300
     const batchesCount = Math.ceil(receivers.length / ADDRESSES_PER_TX)
 
     for (let i = 0; i < batchesCount; i++) {
