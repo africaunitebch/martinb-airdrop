@@ -406,13 +406,14 @@ App = {
       }
 
       // Calculating total sum of 'amounts' array items
-      amounts.map(value => {
+      amounts = amounts.map(value => {
         totalAmount = totalAmount.plus(value)
+        return value.toString()
       })
 
       // Checking arrays length and validities
       if (receivers.length == 0 || amounts.length == 0 || receivers.length != amounts.length) {
-        throw ('Issue with receivers/amount values!')
+        throw (`Receivers/amount lengths should be equal!\nReceivers: ${receivers.length}\nAmounts: ${amounts.length}`)
       }
 
       const allowance = await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call()
