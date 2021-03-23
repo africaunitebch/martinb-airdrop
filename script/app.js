@@ -336,13 +336,11 @@ App = {
   },
 
   toWei: (amount, decimals) => {
-    const BN = App.web3.utils.BN
-    return (new BN(amount.toString()).mul(new BN('10').pow(new BN(decimals.toString()))))
+    return (new BigNumber(amount.toString()).multipliedBy(new BigNumber('10').pow(new BigNumber(decimals.toString()))))
   },
 
   fromWei: (amount, decimals) => {
-    const BN = App.web3.utils.BN
-    return (new BN(amount.toString()).div(new BN('10').pow(new BN(decimals.toString()))))
+    return (new BigNumber(amount.toString()).div(new BigNumber('10').pow(new BigNumber(decimals.toString()))))
   },
 
   reloadListener: e => {
@@ -393,12 +391,11 @@ App = {
       })
 
       // Fetch decimal from contract
-      const BN = App.web3.utils.BN
-      let totalAmount = new BN(0)
+      let totalAmount = new BigNumber(0)
       const decimals = await App.tokenInstance.methods.decimals().call()
 
       // If only 1 amount for all
-      if ($('#amounts').val().split(',').length <= 2) {
+      if ($('#amounts').val().split(',').length < 2) {
         const globalAmount = $('#amounts').val()
         amounts = new Array(receivers.length).fill(App.toWei(globalAmount, decimals).toString())
       } else {
@@ -410,7 +407,7 @@ App = {
 
       // Calculating total sum of 'amounts' array items
       amounts.map(value => {
-        totalAmount = totalAmount.add(new BN(App.toWei(value, decimals)))
+        totalAmount = totalAmount.plus(value)
       })
 
       // Checking arrays length and validities
@@ -418,7 +415,7 @@ App = {
         throw ('Issue with receivers/amount values!')
       }
 
-      const allowance = App.fromWei(await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call(), decimals)
+      const allowance = await App.tokenInstance.methods.allowance(App.account, App.airdropAddress).call()
 
       // If allowance tokens are not enough call approve
       if (totalAmount.gt(allowance)) {
