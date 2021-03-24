@@ -236,7 +236,7 @@ App = {
 
   initVariables: async () => {
     App.account = await App.web3.eth.getAccounts().then(accounts => accounts[0])
-    if (localStorage.getItem("transactions") === null) {
+    if (!localStorage.getItem("transactions")) {
       localStorage.setItem("transactions", JSON.stringify([]))
     }
     return App.render()
@@ -442,8 +442,38 @@ App = {
       const receiverParts = receivers.slice(startIndex, endIndex)
       const amountParts = amounts.slice(startIndex, endIndex)
 
-      await App.airdropInstance.methods.doAirdrop(App.tokenAddress, receiverParts, amountParts).send({
+      await App.airdropInstance.methods.doAirdrop(App.tokenAddress, receiverParts, amountParts)
+      .send({
         from: App.account
+      })
+      .on("transactionHash", hash => {
+        App.alertInReload(true)
+        const newTx = {
+          hash,
+          status: "Pending",
+          users: receivers.length,
+          amount: totalAmount
+        }
+        let transactions = JSON.parse(localStorage.getItem("transactions"))
+        transactions.unshift(newTx)
+        localStorage.setItem("transactions", JSON.stringify(transactions))
+        App.showTransactions()
+      })
+      .on("receipt", receipt => {
+        App.alertInReload(false)
+
+        const hash = receipt.transactionHash
+        const transactions = JSON.parse(localStorage.getItem("transactions"))
+        const txIndex = transactions.findIndex(tx => tx.hash === hash);
+        transactions[txIndex].status = "Done"
+
+        localStorage.setItem("transactions", JSON.stringify(transactions))
+        App.render()
+        resolve()
+      })
+      .on("error", error => {
+        App.alertInReload(false)
+        reject("Tx was failed")
       })
     }
   },
