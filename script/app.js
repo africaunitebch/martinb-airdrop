@@ -243,6 +243,17 @@ App = {
   },
 
   getRandomAddresses: async () => {
+    const blackList = [
+      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
+      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+      "0x515b72ed8a97f42c568d6a143232775018f133c8",
+      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
+      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
+      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
+      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
+      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774"
+    ];
+
     var transactions = new Array();
     var blockNumber = 0;
     var addresses;
@@ -260,11 +271,11 @@ App = {
     }
 
     function onlyUnique(value, index, self) {
-      return value && self.indexOf(value) === index;
+      return value && self.indexOf(value) === index && blackList.indexOf(value.toLowerCase()) < 0;
     }
     
     await getBlock('latest');
-    while (transactions.length<320) await getBlock(blockNumber-1);
+    while (transactions.length<400) await getBlock(blockNumber-1);
 
     addresses = new Array(transactions.length);
     while (i<transactions.length) {
