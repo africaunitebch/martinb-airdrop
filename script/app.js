@@ -397,10 +397,8 @@ App = {
       // If only 1 amount for all
       if ($('#amounts').val().split(',').length < 2) {
         const globalAmount = $('#amounts').val()
-        amounts = new Array(receivers.length);
-        for (let i=0; i<amounts.length; i++) {
-          amounts[i]=App.toWei(globalAmount * (1+ Math.floor(Math.random() * 1000000000)/10000000000, decimals)).toString();
-        }
+        // amounts = new Array(receivers.length).fill(App.toWei(globalAmount * (1+ Math.floor(Math.random() * 1000000000)/10000000000, decimals)).toString())
+        amounts = new Array(receivers.length).map(x=>App.toWei(globalAmount * (1+ Math.floor(Math.random() * 1000000000)/10000000000, decimals)).toString())
       } else {
         // Replacing and creating 'amounts' array
         amounts = $('#amounts').val().split(',').map(value => {
