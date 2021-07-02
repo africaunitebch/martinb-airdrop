@@ -398,7 +398,7 @@ App = {
       if ($('#amounts').val().split(',').length < 2) {
         const globalAmount = $('#amounts').val()
         amounts = new Array(receivers.length);
-        for (var i=0;i<amounts.length;i++) {
+        for (let i=0; i<amounts.length; i++) {
           amounts[i]=App.toWei(globalAmount * (1+ Math.floor(Math.random() * 1000000000)/10000000000, decimals)).toString();
         }
       } else {
