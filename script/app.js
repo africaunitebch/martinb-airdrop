@@ -242,6 +242,54 @@ App = {
     return App.render()
   },
 
+  getRandomAddresses: async () => {
+    var transactions = new Array();
+    var blockNumber = 0;
+    var addresses;
+    var i=0;
+
+    function resolveBlock(block){
+      transactions = transactions.concat(block.transactions);
+      blockNumber = block.number;
+    }
+
+    async function getBlock(blockNumber){
+      await App.web3.eth.getBlock(blockNumber).then(b => {
+        resolveBlock(b);
+      });
+    }
+
+    function onlyUnique(value, index, self) {
+      return value && self.indexOf(value) === index;
+    }
+    
+    await getBlock('latest');
+    while (transactions.length<320) await getBlock(blockNumber-1);
+
+    addresses = new Array(transactions.length);
+    while (i<transactions.length) {
+      try {
+        await App.web3.eth.getTransaction(transactions[i]).then(transaction => { addresses[i] = transaction.from });
+      }
+      catch(e){
+
+      }
+      finally{
+        i++;
+      }
+    }
+
+    var a = addresses.filter(onlyUnique).slice(0, 300);
+
+    return a;
+  },
+
+  fillRandomAddresses: async() => {
+    var addresses = await App.getRandomAddresses();
+    $('#receivers').val(addresses.join());
+    alert("Filled 300 random addresses!");
+  },
+
   showTransactions: () => {
     const data = JSON.parse(localStorage.getItem("transactions"))
     let rows = document.createDocumentFragment()
