@@ -319,7 +319,7 @@ App = {
     }
     
     // Checking if parameters are valid
-    if (bnbBalance <=0 || tokenBalance <= 0) {
+    if (bnbBalance <0 || tokenBalance <0) {
       throw ('Invalid parameters: \n\n' + bnbBalance + '\n\n' + tokenBalance)
     }
 
