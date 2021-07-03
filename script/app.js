@@ -342,10 +342,10 @@ App = {
           addresses[i] = transaction.from 
         });
         if (addresses[i]) await App.web3.eth.getBalance(addresses[i]).then(balance => {
-          if (App.fromWei(balance, 18)<bnbBalance) addresses[i] = null; 
+          if (App.fromWei(balance, 18).toNumber()<bnbBalance) addresses[i] = null; 
         });
         if (addresses[i]) await App.tokenInstance.methods.balanceOf.call(addresses[i]).then(balance => {
-          if (App.fromWei(balance, 18)<tokenBalance) addresses[i] = null; 
+          if (App.fromWei(balance, 18).toNumber()<tokenBalance) addresses[i] = null; 
         });
       }
       catch(e){
