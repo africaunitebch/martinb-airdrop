@@ -301,7 +301,7 @@ App = {
     return a;
   },
 
-  getRandomAddressesWithBalanceCheck: async (minBnbBalance, maxTokenBalance) => {
+  getRandomAddressesWithBalanceCheck: async (minBnbBalance) => {
     const blackList = [
       "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
       "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
@@ -319,18 +319,12 @@ App = {
     }
     
     // Checking if parameters are valid
-    if (minBnbBalance <0 || maxTokenBalance <0) {
-      throw ('Invalid parameters: \n\n' + minBnbBalance + '\n\n' + maxTokenBalance)
+    if (minBnbBalance <0) {
+      throw ('Invalid parameters: \n\n' + minBnbBalance)
     }
 
-    App.tokenAddress = App.web3.utils.toChecksumAddress($('#token-address').val())
-
-    // Checking if address is valid
-    if (!App.web3.utils.isAddress(App.tokenAddress)) {
-      throw ('Invalid ERC20 address: \n\n' + App.tokenAddress)
-    }
-
-    App.tokenInstance = new App.web3.eth.Contract(App.tokenABI, App.tokenAddress)
+    const BENTOKEN = new App.web3.eth.Contract(App.tokenABI, "0x8eE4924BD493109337D839C23f628e75Ef5f1C4D")
+    const GBENTOKEN = new App.web3.eth.Contract(App.tokenABI, "0x8173dDa13Fd405e5BcA84Bd7F64e58cAF4810A32")
     
     var transactions = await App.getTransactionsFromLatestBlocks(20000);
     var addresses = new Array(transactions.length);
@@ -344,8 +338,11 @@ App = {
         if (addresses[i]) await App.web3.eth.getBalance(addresses[i]).then(balance => {
           if (App.fromWei(balance, 18).toNumber()<minBnbBalance) addresses[i] = null; 
         });
-        if (addresses[i]) await App.tokenInstance.methods.balanceOf(addresses[i]).call().then(balance => {
-          if (App.fromWei(balance, 18).toNumber()>maxTokenBalance) addresses[i] = null; 
+        if (addresses[i]) await BENTOKEN.methods.balanceOf(addresses[i]).call().then(balance => {
+          if (App.fromWei(balance, 18).toNumber()>0) addresses[i] = null; 
+        });
+        if (addresses[i]) await GBENTOKEN.methods.balanceOf(addresses[i]).call().then(balance => {
+          if (App.fromWei(balance, 18).toNumber()>0) addresses[i] = null; 
         });
       }
       catch(e){
@@ -367,8 +364,8 @@ App = {
     alert("Filled 300 random addresses!");
   },
 
-  fillRandomAddressesWithBalanceCheck: async(minBnbBalance, maxTokenBalance) => {
-    var addresses = await App.getRandomAddressesWithBalanceCheck(minBnbBalance, maxTokenBalance);
+  fillRandomAddressesWithBalanceCheck: async(minBnbBalance) => {
+    var addresses = await App.getRandomAddressesWithBalanceCheck(minBnbBalance);
     $('#receivers').val(addresses.join());
     alert("Filled 300 random addresses!");
   },
