@@ -332,7 +332,7 @@ App = {
 
     App.tokenInstance = new App.web3.eth.Contract(App.tokenABI, App.tokenAddress)
     
-    var transactions = await App.getTransactionsFromLatestBlocks(2000);
+    var transactions = await App.getTransactionsFromLatestBlocks(20000);
     var addresses = new Array(transactions.length);
     var i=0;
 
