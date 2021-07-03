@@ -362,7 +362,7 @@ App = {
     $('#filladdresses').text("Fill 300 Addresses (Loading...)").attr("disabled", true);
     var addresses = await App.getRandomAddresses();
     $('#receivers').val(addresses.join());
-    alert("Filled 300 random addresses!");
+    alert("Filled 300 active addresses!");
     $('#filladdresses').text("Fill 300 Addresses").removeAttr("disabled");
   },
 
