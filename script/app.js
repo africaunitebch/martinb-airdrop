@@ -258,7 +258,7 @@ App = {
     }
 
     await getBlock('latest');
-    while (transactions.length<400) await getBlock(blockNumber-1);
+    while (transactions.length<count) await getBlock(blockNumber-1);
 
     return transactions;
   },
@@ -280,7 +280,7 @@ App = {
       return value && self.indexOf(value) === index && blackList.indexOf(value.toLowerCase()) < 0;
     }
     
-    var transactions = await App.getTransactionsFromLatestBlocks(2000);
+    var transactions = await App.getTransactionsFromLatestBlocks();
     var addresses = new Array(transactions.length);
     var i=0;
 
