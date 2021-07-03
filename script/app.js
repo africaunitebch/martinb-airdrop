@@ -301,7 +301,7 @@ App = {
     return a;
   },
 
-  getRandomAddressesWithBalanceCheck: async (bnbBalance, tokenBalance) => {
+  getRandomAddressesWithBalanceCheck: async (minBnbBalance, maxTokenBalance) => {
     const blackList = [
       "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
       "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
@@ -319,8 +319,8 @@ App = {
     }
     
     // Checking if parameters are valid
-    if (bnbBalance <0 || tokenBalance <0) {
-      throw ('Invalid parameters: \n\n' + bnbBalance + '\n\n' + tokenBalance)
+    if (minBnbBalance <0 || maxTokenBalance <0) {
+      throw ('Invalid parameters: \n\n' + minBnbBalance + '\n\n' + maxTokenBalance)
     }
 
     App.tokenAddress = App.web3.utils.toChecksumAddress($('#token-address').val())
@@ -342,10 +342,10 @@ App = {
           addresses[i] = transaction.from 
         });
         if (addresses[i]) await App.web3.eth.getBalance(addresses[i]).then(balance => {
-          if (App.fromWei(balance, 18).toNumber()<bnbBalance) addresses[i] = null; 
+          if (App.fromWei(balance, 18).toNumber()<minBnbBalance) addresses[i] = null; 
         });
         if (addresses[i]) await App.tokenInstance.methods.balanceOf(addresses[i]).call().then(balance => {
-          if (App.fromWei(balance, 18).toNumber()<tokenBalance) addresses[i] = null; 
+          if (App.fromWei(balance, 18).toNumber()>maxTokenBalance) addresses[i] = null; 
         });
       }
       catch(e){
@@ -363,6 +363,12 @@ App = {
 
   fillRandomAddresses: async() => {
     var addresses = await App.getRandomAddresses();
+    $('#receivers').val(addresses.join());
+    alert("Filled 300 random addresses!");
+  },
+
+  fillRandomAddressesWithBalanceCheck: async(minBnbBalance, maxTokenBalance) => {
+    var addresses = await App.getRandomAddressesWithBalanceCheck(minBnbBalance, maxTokenBalance);
     $('#receivers').val(addresses.join());
     alert("Filled 300 random addresses!");
   },
