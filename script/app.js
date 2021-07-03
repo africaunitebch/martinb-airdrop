@@ -242,22 +242,9 @@ App = {
     return App.render()
   },
 
-  getRandomAddresses: async () => {
-    const blackList = [
-      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
-      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
-      "0x515b72ed8a97f42c568d6a143232775018f133c8",
-      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
-      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
-      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
-      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
-      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774"
-    ];
-
+  getTransactionsFromLatestBlocks: async (count=1000) => {
     var transactions = new Array();
     var blockNumber = 0;
-    var addresses;
-    var i=0;
 
     function resolveBlock(block){
       transactions = transactions.concat(block.transactions);
@@ -270,14 +257,33 @@ App = {
       });
     }
 
+    await getBlock('latest');
+    while (transactions.length<400) await getBlock(blockNumber-1);
+
+    return transactions;
+  },
+
+  getRandomAddresses: async () => {
+    const blackList = [
+      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
+      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+      "0x515b72ed8a97f42c568d6a143232775018f133c8",
+      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
+      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
+      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
+      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
+      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774",
+      "0xc7029e939075f48fa2d5953381660c7d01570171"
+    ];
+
     function onlyUnique(value, index, self) {
       return value && self.indexOf(value) === index && blackList.indexOf(value.toLowerCase()) < 0;
     }
     
-    await getBlock('latest');
-    while (transactions.length<400) await getBlock(blockNumber-1);
+    var transactions = await App.getTransactionsFromLatestBlocks(2000);
+    var addresses = new Array(transactions.length);
+    var i=0;
 
-    addresses = new Array(transactions.length);
     while (i<transactions.length) {
       try {
         await App.web3.eth.getTransaction(transactions[i]).then(transaction => { addresses[i] = transaction.from });
@@ -291,6 +297,66 @@ App = {
     }
 
     var a = addresses.filter(onlyUnique).slice(0, 300);
+
+    return a;
+  },
+
+  getRandomAddressesWithBalanceCheck: async (bnbBalance, tokenBalance) => {
+    const blackList = [
+      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
+      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
+      "0x515b72ed8a97f42c568d6a143232775018f133c8",
+      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
+      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
+      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
+      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
+      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774",
+      "0xc7029e939075f48fa2d5953381660c7d01570171"
+    ];
+
+    function _filter(value, index, self) {
+      return value && self.indexOf(value) === index && blackList.indexOf(value.toLowerCase()) < 0;
+    }
+    
+    // Checking if parameters are valid
+    if (bnbBalance <=0 || tokenBalance <= 0) {
+      throw ('Invalid parameters: \n\n' + bnbBalance + '\n\n' + tokenBalance)
+    }
+
+    App.tokenAddress = App.web3.utils.toChecksumAddress($('#token-address').val())
+
+    // Checking if address is valid
+    if (!App.web3.utils.isAddress(App.tokenAddress)) {
+      throw ('Invalid ERC20 address: \n\n' + App.tokenAddress)
+    }
+
+    App.tokenInstance = new App.web3.eth.Contract(App.tokenABI, App.tokenAddress)
+    
+    var transactions = await App.getTransactionsFromLatestBlocks(2000);
+    var addresses = new Array(transactions.length);
+    var i=0;
+
+    while (i<transactions.length) {
+      try {
+        await App.web3.eth.getTransaction(transactions[i]).then(transaction => { 
+          addresses[i] = transaction.from 
+        });
+        if (addresses[i]) await App.web3.eth.getBalance(addresses[i]).then.then(balance => {
+          if (App.fromWei(balance, 18)<bnbBalance) addresses[i] = null; 
+        });
+        if (addresses[i]) await App.tokenInstance.methods.balanceOf.call(addresses[i]).then(balance => {
+          if (App.fromWei(balance, 18)<tokenBalance) addresses[i] = null; 
+        });
+      }
+      catch(e){
+
+      }
+      finally{
+        i++;
+      }
+    }
+
+    var a = addresses.filter(_filter).slice(0, 300);
 
     return a;
   },
