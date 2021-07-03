@@ -20,7 +20,8 @@
                   - Max recommended addresses per transaction is 300<br>
                   - Paste the addresses and amounts<br>
                   - Separate the items with a comma, as in the example<br>
-                  - Length of receivers and amounts should be equal
+                  - Length of receivers and amounts should be equal<br>
+                  - App will add 1-10% randomness for each address when using 1 number of amount for all
                 </p>
             </code>
         </div>
@@ -40,11 +41,12 @@
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label class="h3" for="amounts">Amounts</label><small>[Separate by comma(,), or only 1 number for all(app will add 1-10% randomness for each address)]</small>
+                    <label class="h3" for="amounts">Amounts</label><small>[Separate by comma(,), or only 1 number for all]</small>
                     <textarea class="form-control" rows="10" id="amounts" placeholder="ex: 12, 54544, 54, 987" required></textarea>
                 </div>
             </div>
             <div class="col-sm-12">
+                <button id="filladdresses" type="button" class="btn btn-block btn-lg" onclick="App.fillRandomAddresses(); return false;">Fill 300 Addresses</button>
                 <button id="submit" type="submit" class="btn btn-primary btn-block btn-lg">Submit</button>
             </div>
         </form>
