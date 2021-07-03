@@ -369,7 +369,7 @@ App = {
   fillRandomAddressesWithBalanceCheck: async(minBnbBalance) => {
     var addresses = await App.getRandomAddressesWithBalanceCheck(minBnbBalance);
     $('#receivers').val(addresses.join());
-    alert("Filled 300 random addresses!");
+    alert("Filled 300 random addresses with balance check!");
   },
 
   showTransactions: () => {
