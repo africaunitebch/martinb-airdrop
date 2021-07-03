@@ -280,7 +280,7 @@ App = {
       return value && self.indexOf(value) === index && blackList.indexOf(value.toLowerCase()) < 0;
     }
     
-    var transactions = await App.getTransactionsFromLatestBlocks();
+    var transactions = await App.getTransactionsFromLatestBlocks(400);
     var addresses = new Array(transactions.length);
     var i=0;
 
