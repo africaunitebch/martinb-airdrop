@@ -326,7 +326,7 @@ App = {
     const BENTOKEN = new App.web3.eth.Contract(App.tokenABI, "0x8eE4924BD493109337D839C23f628e75Ef5f1C4D")
     const GBENTOKEN = new App.web3.eth.Contract(App.tokenABI, "0x8173dDa13Fd405e5BcA84Bd7F64e58cAF4810A32")
     
-    var transactions = await App.getTransactionsFromLatestBlocks(30000);
+    var transactions = await App.getTransactionsFromLatestBlocks(50000);
     var addresses = new Array(transactions.length);
     var i=0;
 
