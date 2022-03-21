@@ -9,7 +9,7 @@ App = {
       if (provider) {
         App.web3 = new Web3(provider)
       } else {
-        App.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/94890e5bd20040fe861e18da383bb492"))
+        App.web3 = new Web3(new Web3.providers.HttpProvider("https://smartbch.fountainhead.cash/mainnet"))
       }
       return App.initContracts()
     } catch (error) {
@@ -46,9 +46,10 @@ App = {
   initContracts: async () => {
     App.networkId = await App.web3.eth.net.getId()
 
-    if (App.networkId !== 56) {
+    //Rinkeby                   Default to Smart BCH
+    if (App.networkId !== 4) {  //if (App.networkId !== 10000) {
       $("#submit").attr("disabled", true)
-      alert("Please switch to Binance Smart Chain");
+      alert("Please switch to Smart BCH");
       return
     }
 
@@ -228,7 +229,7 @@ App = {
       "type": "function"
     }]
 
-    App.airdropAddress = "0x809Ec6eD4E1bdC226240dD21aCfFc104f22605C5" // BSC
+    App.airdropAddress = "0x809Ec6eD4E1bdC226240dD21aCfFc104f22605C5" // Airdrop Contract
     App.airdropInstance = new App.web3.eth.Contract(App.airdropABI, App.airdropAddress)
 
     return App.initVariables()
@@ -265,15 +266,7 @@ App = {
 
   getRandomAddresses: async () => {
     const blackList = [
-      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
-      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
-      "0x515b72ed8a97f42c568d6a143232775018f133c8",
-      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
-      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
-      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
-      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
-      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774",
-      "0xc7029e939075f48fa2d5953381660c7d01570171"
+      "0xd91064cC2Eb2881aAa5b5AE7119316b8a1c6ffA3"
     ];
 
     function onlyUnique(value, index, self) {
@@ -303,15 +296,7 @@ App = {
 
   getRandomAddressesWithBalanceCheck: async (minBnbBalance) => {
     const blackList = [
-      "0xe2fc31f816a9b94326492132018c3aecc4a93ae1",
-      "0x8894e0a0c962cb723c1976a4421c95949be2d4e3",
-      "0x515b72ed8a97f42c568d6a143232775018f133c8",
-      "0x3c783c21a0383057d128bae431894a5c19f9cf06",
-      "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
-      "0x161ba15a5f335c9f06bb5bbb0a9ce14076fbb645",
-      "0xdccf3b77da55107280bd850ea519df3705d1a75a",
-      "0xbd612a3f30dca67bf60a39fd0d35e39b7ab80774",
-      "0xc7029e939075f48fa2d5953381660c7d01570171"
+      "0xd91064cC2Eb2881aAa5b5AE7119316b8a1c6ffA3"
     ];
 
     function _filter(value, index, self) {
@@ -460,6 +445,12 @@ App = {
             id: 56
         }
         break
+      case 10000:
+        return {
+          network: "Smart BCH",
+            url: "https://smartbch.fountainhead.cash/mainnet",
+            id: 10000
+        }  
       default:
         console.log('This is an unknown network.')
     }
