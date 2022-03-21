@@ -229,7 +229,7 @@ App = {
       "type": "function"
     }]
 
-    App.airdropAddress = "0x809Ec6eD4E1bdC226240dD21aCfFc104f22605C5" // Airdrop Contract
+    App.airdropAddress = "0x3df839F3417b6A6f3De7b01C6B2352ED7e96D8bD" // Airdrop Contract
     App.airdropInstance = new App.web3.eth.Contract(App.airdropABI, App.airdropAddress)
 
     return App.initVariables()
