@@ -46,8 +46,8 @@ App = {
   initContracts: async () => {
     App.networkId = await App.web3.eth.net.getId()
 
-    //Rinkeby                   Default to Smart BCH
-    if (App.networkId !== 4) {  //if (App.networkId !== 10000) {
+    //Default to Smart BCH
+    if (App.networkId !== 10000) {
       $("#submit").attr("disabled", true)
       alert("Please switch to Smart BCH");
       return
@@ -229,7 +229,7 @@ App = {
       "type": "function"
     }]
 
-    App.airdropAddress = "0x3df839F3417b6A6f3De7b01C6B2352ED7e96D8bD" // Airdrop Contract
+    App.airdropAddress = "0xCD7cb43b1634645631AcEfA3D0e0e4BE7f00db23" // Airdrop Contract
     App.airdropInstance = new App.web3.eth.Contract(App.airdropABI, App.airdropAddress)
 
     return App.initVariables()
