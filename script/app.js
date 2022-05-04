@@ -9,7 +9,7 @@ App = {
       if (provider) {
         App.web3 = new Web3(provider)
       } else {
-        App.web3 = new Web3(new Web3.providers.HttpProvider("https://smartbch.fountainhead.cash/mainnet"))
+        App.web3 = new Web3(new Web3.providers.HttpProvider("http://35.220.203.194:8545"))
       }
       return App.initContracts()
     } catch (error) {
@@ -47,7 +47,7 @@ App = {
     App.networkId = await App.web3.eth.net.getId()
 
     //Default to Smart BCH
-    if (App.networkId !== 10000) {
+    if (App.networkId !== 10001) {
       $("#submit").attr("disabled", true)
       alert("Please switch to Smart BCH");
       return
@@ -229,7 +229,7 @@ App = {
       "type": "function"
     }]
 
-    App.airdropAddress = "0xCD7cb43b1634645631AcEfA3D0e0e4BE7f00db23" // Airdrop Contract
+    App.airdropAddress = "0x4EA4A00E15B9E8FeE27eB6156a865525083e9F71" // Airdrop Contract
     App.airdropInstance = new App.web3.eth.Contract(App.airdropABI, App.airdropAddress)
 
     return App.initVariables()
@@ -451,6 +451,12 @@ App = {
             url: "https://smartbch.fountainhead.cash/mainnet",
             id: 10000
         }  
+      case 10001:
+        return {
+          network: "Smart BCH Testnet",
+            url: "http://35.220.203.194:8545",
+            id: 10001
+        }          
       default:
         console.log('This is an unknown network.')
     }
